@@ -537,7 +537,7 @@ def _guarded_write(course: str, method: str, path: str, body, send) -> str:
             base.update(course_id=rec["id"], course_name=rec["name"])
         d = data if isinstance(data, dict) else {}
         _audit(outcome="ok" if r.status_code < 400 else "http_error", status=r.status_code,
-               result_id=d.get("id"), html_url=d.get("html_url"), **base)
+               result_id=d.get("id", d.get("page_id")), html_url=d.get("html_url"), **base)
         return _echo(rec, course, method, path, r.status_code) + "\n" + _out(r.status_code, data)
 
 

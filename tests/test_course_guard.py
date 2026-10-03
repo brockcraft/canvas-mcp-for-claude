@@ -309,6 +309,15 @@ class EchoCacheLog(GuardTest):
                     "path", "status", "body_keys", "result_id", "html_url"):
             self.assertIn(key, ok)
 
+    def test_page_id_logged_as_result_id(self):
+        def handler(req):  # Canvas returns pages with page_id rather than id
+            if req.method == "POST":
+                return httpx.Response(200, json={"page_id": 77, "url": "week-1", "html_url": f"https://{HOST}/x"})
+            return self.canvas(req)
+        with mock.patch.object(s, "_client", lambda: httpx.Client(transport=httpx.MockTransport(handler))):
+            self.write("ABC 101 Au26", "courses/1001/pages", "POST")
+        self.assertEqual(self.log_lines()[-1]["result_id"], 77)
+
     def test_http_error_outcome(self):
         def handler(req):
             return httpx.Response(403, json={"errors": "no"}) if req.method == "PUT" else self.canvas(req)

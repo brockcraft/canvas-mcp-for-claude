@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 (2026-10-03)
+
+- Audit log: `result_id` is now filled in for pages, which Canvas returns with `page_id` instead of `id`.
+
 ## 1.0.0 (2026-10-03)
 
 **Breaking:** `canvas_write` and `canvas_upload_file` now require a `course` argument. Calls without it fail. Update the skill along with the connector (see "Updating" in the README).
