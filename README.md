@@ -34,7 +34,22 @@ Three general-purpose tools instead of one tool per endpoint. Claude picks endpo
 
 - macOS with the Claude desktop app
 - Python 3.10 or later
-- A Canvas access token: in Canvas, open Account → Settings → Approved Integrations → New Access Token. Set an expiration date.
+- A Canvas access token (see "Getting a Canvas access token" below)
+
+## Getting a Canvas access token
+
+The connector signs in to Canvas with a personal access token, sometimes called an API key. You create it in Canvas yourself, and it acts with your account's permissions.
+
+1. Sign in to Canvas in a web browser.
+2. Click **Account** in the left navigation, then **Settings**.
+3. Scroll to **Approved Integrations** and click **+ New Access Token**.
+4. Enter a purpose, such as "Claude connector", and set an expiration date. A term's length is a reasonable choice.
+5. Click **Generate Token**, then copy the token. Canvas shows it only once; if you lose it, delete it and generate a new one.
+6. Run setup right away and paste the token when prompted. Don't save it in a file, email or chat, including a chat with Claude.
+
+When the token expires, generate a new one and run `bash scripts/setup.sh` again to replace it in Keychain. To revoke a token, open the same Approved Integrations list and click the trash icon next to it.
+
+Some institutions turn off personal access tokens. If you don't see **+ New Access Token**, ask your Canvas administrator.
 
 ## Setup
 
