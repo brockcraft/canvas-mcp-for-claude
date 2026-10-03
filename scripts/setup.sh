@@ -21,7 +21,7 @@ for c in python3.13 python3.12 python3.11 python3.10 python3; do
 done
 if [ -z "$PY" ]; then echo "Need Python 3.10+. Install with: brew install python"; exit 1; fi
 "$PY" -m venv "$DEST/venv"
-"$DEST/venv/bin/pip" install -q --upgrade pip "mcp>=1.10,<2" httpx
+"$DEST/venv/bin/pip" install -q --upgrade pip "mcp>=1.10,<2" httpx "tomli; python_version < '3.11'"
 echo "Installed connector in $DEST"
 
 # 2. Token into Keychain (you'll be prompted to paste it; input is hidden).
