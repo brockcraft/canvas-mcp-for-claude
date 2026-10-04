@@ -76,9 +76,17 @@ Some institutions turn off personal access tokens. If you don't see **+ New Acce
 
 ## Setup
 
-Install it one of two ways: with Homebrew (no clone, no setup script) or with the setup script. For either, first get your Canvas access token (above) and know your Canvas host: the address you sign in to Canvas at, without `https://` (for example `canvas.example.edu`). **The connector has no default host, so you must give it yours.**
+Install it one of two ways: with the setup script (easier; it asks for what it needs and does the rest) or with Homebrew (for people who already use it). For either, first get your Canvas access token (above) and know your Canvas host: the address you sign in to Canvas at, without `https://` (for example `canvas.example.edu`). **The connector has no default host, so you must give it yours.**
 
-### Option 1: Homebrew (macOS or Linux)
+### Option 1: Setup script (easier)
+
+1. Clone or download this repository and open a terminal in its folder.
+2. Know your Canvas host: the address you sign in to Canvas at, without `https://` (for example `canvas.example.edu`). **The connector has no default host, so you must give it yours.** Run `bash scripts/setup.sh`. It asks for your Canvas host, installs the connector in `~/.canvas-mcp`, creates a Python environment (MCP SDK 1.x and httpx, plus tomli on Python 3.10), prompts for the token (input is hidden) and stores it in Keychain, then confirms Canvas responds with your name.
+3. When asked, let it add the connector to the Claude desktop config. It backs up `claude_desktop_config.json` first. To do this step later, run `python3 scripts/add_to_config.py --host your.canvas.host`.
+4. Quit the Claude desktop app (Cmd+Q) and reopen it.
+5. Test it by asking Claude: "List the pages in Canvas course *course ID*."
+
+### Option 2: Homebrew (macOS or Linux)
 
 1. Install it:
    ```
@@ -111,14 +119,6 @@ Install it one of two ways: with Homebrew (no clone, no setup script) or with th
 For Claude Code, use: `claude mcp add canvas -e CANVAS_HOST=canvas.example.edu -- "$(brew --prefix)/bin/canvas-mcp"`
 
 The tap's source is at [brockcraft/homebrew-canvas-mcp](https://github.com/brockcraft/homebrew-canvas-mcp).
-
-### Option 2: Setup script
-
-1. Clone or download this repository and open a terminal in its folder.
-2. Know your Canvas host: the address you sign in to Canvas at, without `https://` (for example `canvas.example.edu`). **The connector has no default host, so you must give it yours.** Run `bash scripts/setup.sh`. It asks for your Canvas host, installs the connector in `~/.canvas-mcp`, creates a Python environment (MCP SDK 1.x and httpx, plus tomli on Python 3.10), prompts for the token (input is hidden) and stores it in Keychain, then confirms Canvas responds with your name.
-3. When asked, let it add the connector to the Claude desktop config. It backs up `claude_desktop_config.json` first. To do this step later, run `python3 scripts/add_to_config.py --host your.canvas.host`.
-4. Quit the Claude desktop app (Cmd+Q) and reopen it.
-5. Test it by asking Claude: "List the pages in Canvas course *course ID*."
 
 **Your Canvas host (required).** The connector will not run without one: every tool call fails with a message asking you to set it. Setup uses the host as the Keychain account label, and `add_to_config.py` writes `"env": {"CANVAS_HOST": "canvas.example.edu"}` into the connector's config entry. If you install another way (Homebrew, or editing the config by hand), set `CANVAS_HOST` in that `env` entry yourself, or set `host = "canvas.example.edu"` in `~/.config/canvas-mcp/config.toml`. `CANVAS_HOST` wins if both are set.
 
