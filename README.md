@@ -2,13 +2,15 @@
 
 [![Tests](https://github.com/brockcraft/canvas-mcp-for-claude/actions/workflows/tests.yml/badge.svg)](https://github.com/brockcraft/canvas-mcp-for-claude/actions/workflows/tests.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A Canvas extension for the Claude desktop app. It is a small local MCP server that gives Claude access to the full Canvas LMS REST API with your personal access token. The token stays in your Mac's Keychain; Claude never sees it.
+A Canvas extension for the Claude desktop app. It is a small local MCP server that gives Claude access to the full Canvas LMS REST API with your personal access token. The token is stored securely on your Mac, and Claude never sees it.
 
 In practice, it lets you use Claude to edit your Canvas course content by asking in plain language: change due dates, publish or unpublish items, reorganize modules, attach rubrics, draft pages and more. See "What you can do with it" for examples.
 
 It installs two ways: as a **Claude Desktop extension** (recommended, one click) or as a **local connector** for Claude Code and other setups (see "Other ways to install"). Elsewhere in this README, "the connector" means the software itself, however you installed it.
 
-**Install:** [download the Canvas extension](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and double-click it. No terminal needed. Details are in "Install the extension" below.
+**Before you install, have two things ready:** a Canvas access token (an API key you create in Canvas; see "Getting a Canvas access token" below) and your Canvas host (the address you sign in to Canvas at, such as `canvas.example.edu`). The installer asks for both right away.
+
+**Then install:** [download the Canvas extension](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and double-click it. No terminal needed. Details are in "Install the Canvas extension" below.
 
 Author: Brock Craft, Human Centered Design & Engineering, University of Washington
 
@@ -27,7 +29,7 @@ Example prompts (name the course, for example "ABC 101 Au26", or set it in the p
 - **Upload files.** "Upload ~/Documents/week3-slides.pdf to ABC 101 Au26 and add it to the Week 3 module."
 - **Audit without changing anything.** "List every assignment with no due date or no points, and every module with nothing in it."
 
-Reading is never restricted, so an audit like the last one is a good first try. For anything with many edits, ask Claude to list what it plans to change before it starts.
+The connector never restricts reading, so an audit like the last one is a good first try. For anything with many edits, ask Claude to list what it plans to change before it starts.
 
 ## Why it exists
 
@@ -35,7 +37,7 @@ Claude's sandboxed environments (Cowork and cloud sessions) send network traffic
 
 ```
 Claude session  ──MCP──▶  connector on your Mac  ──HTTPS + token──▶  Canvas
-                           (token kept in Keychain)
+                           (token stored on your Mac)
 ```
 
 ## What Claude gets
@@ -53,7 +55,7 @@ Every write names its course and goes through the course guard (see below).
 
 ## Security design
 
-- The token is stored in macOS Keychain (by Claude Desktop for the extension, or by the setup script) and used only when a request is sent. It is never returned to Claude, logged, or written to a file by the connector.
+- The token is stored by Claude Desktop when you install the extension (the extension format keeps sensitive settings in the macOS Keychain), or in the Keychain by the setup script. The connector sends it only to your Canvas host. It is never returned to Claude, logged, or written to a file by the connector.
 - Requests go only to the configured Canvas host. Requests, pagination links and redirects pointing anywhere else are refused.
 - During file uploads, the storage server receives the file but not the token.
 - `canvas_get` and `canvas_courses` are marked read-only, so the desktop app can allow them automatically while still asking before each write.
@@ -74,7 +76,7 @@ The connector signs in to Canvas with a personal access token, sometimes called 
 3. Scroll to **Approved Integrations** and click **+ New Access Token**.
 4. Enter a purpose, such as "Claude Canvas extension", and set an expiration date. A term's length is a reasonable choice.
 5. Click **Generate Token**, then copy the token. Canvas shows it only once; if you lose it, delete it and generate a new one.
-6. Install the extension right away and paste the token when it asks. Don't save it in a file, email or chat, including a chat with Claude.
+6. Note your Canvas host as well (the address you sign in at). Install the extension right away and enter both when it asks. Don't save it in a file, email or chat, including a chat with Claude.
 
 When the token expires, generate a new one and enter it in the extension's settings in Claude Desktop (or run `bash scripts/setup.sh` again if you used the setup script). To revoke a token, open the same Approved Integrations list and click the trash icon next to it.
 
@@ -84,7 +86,7 @@ Some institutions turn off personal access tokens. If you don't see **+ New Acce
 
 1. **Download the Canvas extension:** [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb).
 2. **Open it.** Double-click the downloaded file, or drag it into the Claude desktop app. (You can also use Settings → Extensions.)
-3. **Fill in two fields** when Claude asks: your **Canvas host** and your **Canvas access token**. The token field is hidden, and Claude Desktop keeps it in your Mac's Keychain.
+3. **Fill in two fields** when Claude asks: your **Canvas host** and your **Canvas access token**. The token field is hidden, and Claude Desktop stores it securely on your Mac.
 4. Click **Install**, then start a new chat.
 5. **Test it** by asking Claude: "List my Canvas courses."
 
@@ -94,7 +96,7 @@ That's all: no terminal, no Python, no editing files. To turn it off or remove i
 
 - The source is in this repository and the server is a single file, `server/canvas_mcp_server.py`. The extension is built from it by `scripts/build_mcpb.sh`, so you can read the code and rebuild the bundle yourself.
 - It sends requests only to the Canvas host you enter. Links, pagination and redirects to anywhere else are refused in code.
-- It reads a file from your Mac only when Claude uploads one to a course, and writes only an audit log (`~/Library/Logs/canvas-mcp/`) that holds no values or tokens. Each write asks for your approval in Claude.
+- It reads a file from your Mac only when Claude uploads one to a course, and writes only an audit log (`~/Library/Logs/canvas-mcp/`) that holds no values or tokens. By default, each write asks for your approval in Claude.
 - Only install a copy downloaded from this repository's [releases page](https://github.com/brockcraft/canvas-mcp-for-claude/releases). Don't open a `.mcpb` file someone sent you.
 
 **Already using an older install?** If you set it up earlier as a local connector (with the setup script or by editing the config file), you will have both the extension and the connector. Remove the old connector (see "Uninstall") so Claude doesn't pick between them.
@@ -152,7 +154,7 @@ Every write result starts with a line naming the course, so a mistake is visible
 
 **Term names.** Labels are matched against term names of the form "Season YYYY". If your institution names terms differently, use the term name exactly as Canvas shows it (for example `"ABC 101 2026-27 Academic Year"`), the full course code, or the course ID.
 
-**Configuration.** All settings are optional. Put them in `~/.config/canvas-mcp/config.toml`, or set `CANVAS_MCP_<KEY>` environment variables (comma-separated for lists). Use `CANVAS_MCP_CONFIG` to point to a different file. For the desktop app, environment variables go in the connector's `env` entry in the Claude config, but `add_to_config.py` replaces that entry when it runs, so the config file is the safer place. Settings are read when the connector starts, so restart Claude after changing them. If the file is invalid, reads still work and every write is refused until it's fixed.
+**Configuration.** All settings are optional. Put them in `~/.config/canvas-mcp/config.toml`, or set `CANVAS_MCP_<KEY>` environment variables (comma-separated for lists). Use `CANVAS_MCP_CONFIG` to point to a different file. The extension's own settings screen covers only the host and token, so use this config file for anything else. If you installed with the setup script, you can also put environment variables in the connector's `env` entry in the Claude config, but `add_to_config.py` replaces that entry when it runs, so the config file is the safer place. Settings are read when the connector starts, so restart Claude after changing them. If the file is invalid, reads still work and every write is refused until it's fixed.
 
 | Key | Default | Purpose |
 |---|---|---|
@@ -187,7 +189,7 @@ allow_ids = [12345]
 
 - The Mac must be awake with the Claude desktop app open.
 - macOS only as written. With the setup script, other systems can fall back to a token file at `~/.canvas/token` (set permissions to 600), but this is untested.
-- Sessions opened before installation may need to refresh their tool list before the Canvas tools appear.
+- Chats that were open before you installed or updated the extension won't have the Canvas tools. Start a new chat.
 - Responses longer than 150,000 characters are truncated; narrow requests with `per_page`, `include[]` or `search_term`.
 - Built on MCP Python SDK 1.x. Version 2 renamed `FastMCP`, so the extension and the setup script pin `mcp<2`.
 - Writes to paths the course guard can't attribute to a course are refused, including replies to existing conversations (`conversations/:id/...`) and account-level paths. Add a prefix to `unscoped_allow_prefixes` only if you accept that those writes skip the course check.
@@ -209,22 +211,27 @@ allow_ids = [12345]
 | `scripts/build_mcpb.sh` | Builds the extension (`dist/canvas-mcp-<version>.mcpb`) |
 | `scripts/setup.sh` | One-time install and Keychain setup (setup-script route) |
 | `scripts/add_to_config.py` | Adds the connector to the Claude desktop config, with a backup |
+| `SECURITY.md` | How to report a security problem |
+| `.github/` | Issue forms and the workflow that runs the tests and builds the extension |
 | `tests/test_course_guard.py` | Course guard tests, against a mocked Canvas API |
 
 ## Running tests
 
-The tests use a mocked Canvas API: no network access, no token, no Keychain. From the repository root, with the connector's Python environment:
+The tests use a mocked Canvas API: no network access, no token, no Keychain. From the repository root, install the two dependencies and run them:
 
 ```
-~/.canvas-mcp/venv/bin/python -m unittest discover -s tests
+python3 -m pip install "mcp>=1.10,<2" httpx
+python3 -m unittest discover -s tests
 ```
+
+(Use Python 3.10 or later. If you installed with the setup script, `~/.canvas-mcp/venv/bin/python -m unittest discover -s tests` also works.) The same tests run on GitHub for every change.
 
 ## Related projects
 
 Other open-source projects also connect Claude to Canvas. This list is not exhaustive, and I have not tested the others; their own READMEs are the best guide.
 
 - **[vishalsachdev/canvas-mcp](https://github.com/vishalsachdev/canvas-mcp)** is the most widely used. It is a broad suite of about 100 purpose-built tools for students and educators, including grading, messaging, accessibility scanning, optional anonymization of student data, and workflow skills. It works with many AI clients and also installs as a one-click Claude Desktop extension. If you want ready-made tools for particular jobs, start there.
-- **This project** is deliberately small: four generic tools that reach the whole Canvas API, in one readable server file of about 700 lines. Its distinguishing feature is the course guard: every write must name a live course and is refused if the path belongs to a different one (see "Course guard"). If you want a small connector you can read in an afternoon, with that check on every write, use this.
+- **This project** is deliberately small: four generic tools that reach the whole Canvas API, in one readable server file of under 800 lines. Its distinguishing feature is the course guard: every write must name a live course and is refused if the path belongs to a different one (see "Course guard"). If you want a small connector you can read in an afternoon, with that check on every write, use this.
 
 More are on GitHub; search for "canvas mcp".
 
