@@ -13,8 +13,11 @@ checks that the path belongs to that course and that the course is live, and
 every attempt is recorded (keys only, no values) in a local audit log.
 
 The Canvas host is required: set the CANVAS_HOST environment variable, or `host`
-in ~/.config/canvas-mcp/config.toml. There is no default. The token is read from macOS Keychain (service "canvas-api")
-at request time and is never returned to Claude, logged, or sent to any host
+in ~/.config/canvas-mcp/config.toml. There is no default.
+
+The token is read at request time from the CANVAS_API_TOKEN environment variable
+(set by the Claude desktop extension), else macOS Keychain (service "canvas-api"),
+else ~/.canvas/token. It is never returned to Claude, logged, or sent to any host
 but Canvas. Optional settings live in ~/.config/canvas-mcp/config.toml.
 """
 import json, logging, os, re, subprocess, sys, time
@@ -148,6 +151,10 @@ NO_HOST_MESSAGE = ("No Canvas host is configured. Set CANVAS_HOST to your instit
 
 
 def _token() -> str:
+    # The Claude Desktop extension passes the token it stores as CANVAS_API_TOKEN.
+    t = os.environ.get("CANVAS_API_TOKEN", "").strip()
+    if t:
+        return t
     try:
         t = subprocess.run(["security", "find-generic-password", "-s", KEYCHAIN_SERVICE, "-w"],
                            capture_output=True, text=True, check=True).stdout.strip()
@@ -158,7 +165,7 @@ def _token() -> str:
     p = os.path.expanduser("~/.canvas/token")
     if os.path.exists(p):
         return "".join(open(p).read().split())
-    raise RuntimeError("No Canvas token found. Run scripts/setup.sh to store one in Keychain.")
+    raise RuntimeError("No Canvas token found. Reinstall the extension and enter your token, or run scripts/setup.sh to store one in Keychain.")
 
 
 def _url(path: str) -> str:

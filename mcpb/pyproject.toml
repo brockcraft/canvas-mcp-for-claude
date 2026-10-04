@@ -1,0 +1,12 @@
+[project]
+name = "canvas-mcp"
+version = "1.2.0"
+description = "Local MCP connector for the Canvas LMS REST API"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.10,<2",
+    "httpx",
+    "tomli; python_version < '3.11'",
+    # Newer cryptography has no precompiled build for Intel Macs, and compiling needs Rust.
+    "cryptography<49; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+]

@@ -406,6 +406,18 @@ class HostRequired(unittest.TestCase):
                 self.assertIn("CANVAS_HOST", str(cm.exception))
 
 
+class TokenSource(unittest.TestCase):
+    def test_env_token_wins_and_is_stripped(self):
+        with mock.patch.dict(os.environ, {"CANVAS_API_TOKEN": "  tok-from-env \n"}), \
+                mock.patch.object(s.subprocess, "run", side_effect=AssertionError("Keychain must not be read")):
+            self.assertEqual(s._token(), "tok-from-env")
+
+    def test_empty_env_token_falls_through(self):
+        with mock.patch.dict(os.environ, {"CANVAS_API_TOKEN": "   "}), \
+                mock.patch.object(s.subprocess, "run", return_value=mock.Mock(stdout="tok-from-keychain\n")):
+            self.assertEqual(s._token(), "tok-from-keychain")
+
+
 class ToolSignatures(unittest.TestCase):
     def test_course_is_required(self):
         import asyncio

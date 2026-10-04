@@ -24,3 +24,5 @@ env/
 *token*
 .canvas/
 canvas_test*
+build/
+dist/
