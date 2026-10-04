@@ -87,7 +87,7 @@ Some institutions turn off personal access tokens. If you don't see **+ New Acce
 1. **Download the Canvas extension:** [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb).
 2. **Open it.** Double-click the downloaded file, or drag it into the Claude desktop app. (You can also use Settings → Extensions.)
 3. **Fill in two fields** when Claude asks: your **Canvas host** and your **Canvas access token**. The token field is hidden, and Claude Desktop stores it securely on your Mac.
-4. Click **Install**, then start a new chat.
+4. Click **Install**, then **start a new chat**. A chat that was already open won't have the extension.
 5. **Test it** by asking Claude: "List my Canvas courses."
 
 That's all: no terminal, no Python, no editing files. To turn it off or remove it, use Settings → Extensions (it appears as "Canvas Extension"). Claude Desktop installs and manages the Python it needs by itself.
@@ -123,7 +123,7 @@ Replace `canvas.example.edu` with your host.
 
 ## Updating
 
-**Extension:** download the newest [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and install it. Remove the old version first (Settings → Extensions → Canvas Extension → remove), then open the new file. Removing the old version clears your settings, so you will enter your Canvas host and token again. Canvas shows a token only once, so if you didn't keep it, create a new token in Canvas (and revoke the old one). Then start a new chat. If you uploaded the Canvas skill that came with versions before 1.4.0, you can delete it under Settings → Customize → Skills; its rules are now built into the extension, and leaving it does no harm.
+**Extension:** download the newest [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and install it. Remove the old version first (Settings → Extensions → Canvas Extension → remove), then open the new file. Removing the old version clears your settings, so you will enter your Canvas host and token again. Canvas shows a token only once, so if you didn't keep it, create a new token in Canvas (and revoke the old one). Then **start a new chat**: chats that were open keep the old version's behavior. If you uploaded the Canvas skill that came with versions before 1.4.0, you can delete it under Settings → Customize → Skills; its rules are now built into the extension, and leaving it does no harm.
 
 **Setup script (connector):** to install a new version over an existing one:
 
@@ -189,7 +189,7 @@ allow_ids = [12345]
 
 - The Mac must be awake with the Claude desktop app open.
 - macOS only as written. With the setup script, other systems can fall back to a token file at `~/.canvas/token` (set permissions to 600), but this is untested.
-- Chats that were open before you installed or updated the extension won't have the Canvas tools. Start a new chat.
+- A chat keeps the tools and instructions it started with. After you install or update the extension, start a new chat, or the old chat will have no Canvas tools (after installing) or the previous version's behavior (after updating).
 - Responses longer than 150,000 characters are truncated; narrow requests with `per_page`, `include[]` or `search_term`.
 - Built on MCP Python SDK 1.x. Version 2 renamed `FastMCP`, so the extension and the setup script pin `mcp<2`.
 - Writes to paths the course guard can't attribute to a course are refused, including replies to existing conversations (`conversations/:id/...`) and account-level paths. Add a prefix to `unscoped_allow_prefixes` only if you accept that those writes skip the course check.
