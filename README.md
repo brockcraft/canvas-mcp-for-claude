@@ -86,18 +86,18 @@ Install it one of two ways: with the setup script (easier; it asks for what it n
 4. Quit the Claude desktop app (Cmd+Q) and reopen it.
 5. Test it by asking Claude: "List the pages in Canvas course *course ID*."
 
-### Option 2: Homebrew (macOS or Linux)
+### Option 2: Homebrew (Apple Silicon Mac)
 
 1. Install it:
    ```
    brew install brockcraft/canvas-mcp/canvas-mcp
    ```
+   This is tested on Apple Silicon Macs only. Homebrew no longer provides precompiled packages for Intel Macs, so an install there compiles everything and may fail; on those Macs use the setup script. Linux is untested.
    Use the full name: Homebrew 6 and later won't load formulae from third-party taps until you trust them, and installing by full name trusts only this one formula. If you tapped first and see "Refusing to load formula from untrusted tap", run `brew trust --formula brockcraft/canvas-mcp/canvas-mcp`. Homebrew puts the connector in its own private Python environment, so it doesn't touch your system Python.
 2. Store your token in Keychain. Replace `canvas.example.edu` with your host. Input is hidden:
    ```
    security add-generic-password -s canvas-api -a canvas.example.edu -w
    ```
-   On Linux, save the token to `~/.canvas/token` and run `chmod 600 ~/.canvas/token`.
 3. Add the connector to the Claude desktop config. Print the full path to the installed command:
    ```
    echo "$(brew --prefix)/bin/canvas-mcp"
