@@ -119,9 +119,11 @@ Claude Code uses its own config. After running the setup script:
 `claude mcp add canvas -e CANVAS_HOST=canvas.example.edu -- ~/.canvas-mcp/venv/bin/python ~/.canvas-mcp/canvas_mcp_server.py`
 Replace `canvas.example.edu` with your host.
 
-## Installing the skill
+## Installing the skill (optional)
 
-`skill/canvas-api/SKILL.md` sets working rules for Claude when it uses Canvas: name the course on every write and ask rather than guess when it isn't known, confirm the course before the first change, create content unpublished, and ask before deletions, grade changes, messages to students, and bulk edits. The extension doesn't install it for you, so add it once:
+The working rules Claude needs are already part of the extension: its tool descriptions tell Claude to name the course on every write, create content unpublished, ask before deletions, publishing, grade or due-date changes, messages to students and bulk edits, and check each result before saying it worked. You don't need the skill for that, and updating the extension updates those rules.
+
+`skill/canvas-api/SKILL.md` adds the longer playbook: request patterns for pages, assignments, modules, announcements and calendar events, and fuller working rules. Add it if you want that extra guidance:
 
 - **Claude app:** download `canvas-api-skill.zip` from the [latest release](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest), then open Settings → Customize → Skills and choose to upload a skill. (If you cloned this repository, you can upload `skill/canvas-api/SKILL.md` instead.)
 - **Claude Code:** copy the folder to your skills directory:
@@ -129,13 +131,13 @@ Replace `canvas.example.edu` with your host.
 
 ## Updating
 
-**Extension:** download the newest [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and install it. Remove the old version first (Settings → Extensions → Canvas Extension → remove), then open the new file. Removing the old version clears your settings, so you will enter your Canvas host and token again. Canvas shows a token only once, so if you didn't keep it, create a new token in Canvas (and revoke the old one). Upload the skill again as well, then start a new chat.
+**Extension:** download the newest [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and install it. Remove the old version first (Settings → Extensions → Canvas Extension → remove), then open the new file. Removing the old version clears your settings, so you will enter your Canvas host and token again. Canvas shows a token only once, so if you didn't keep it, create a new token in Canvas (and revoke the old one). If you use the optional skill, upload it again too. Then start a new chat.
 
 **Setup script (connector):** to install a new version over an existing one:
 
 1. Get the new code: `git pull` in your copy of this repository, or download it again.
 2. Run `bash scripts/setup.sh`. Enter your Canvas host (or press Enter to keep the one in `CANVAS_HOST`), answer **N** when asked to replace the token (your Keychain entry is kept), and answer **N** to the config question unless your host changed. Upgrading from before 1.1.0? Your config needs a host now; see the CHANGELOG.
-3. Update the skill as described in "Installing the skill".
+3. If you use the optional skill, update it as described in "Installing the skill".
 4. Quit the Claude desktop app (Cmd+Q) and reopen it.
 
 Check the CHANGELOG for breaking changes before updating. Version 1.0.0 added a required `course` argument to the write tools, and version 1.1.0 removed the default Canvas host.
@@ -186,7 +188,7 @@ allow_ids = [12345]
 ## Recommended safeguards
 
 - In the desktop app (once installed), in the Extension's Tool Permissions, set the read-only tools (`canvas_get`, `canvas_courses`) to always allow, and the write tools (`canvas_write`, `canvas_upload_file`) to ask each time. The course guard checks which course a write goes to; asking each time lets you check what is being written.
-- Install the included skill (see above).
+- Optionally install the included skill for the longer playbook (see above); the essential rules already come with the extension.
 - In each Claude project that works on a course, state the course in the project's instructions, for example "Canvas course: ABC 101 Au26". The agent then passes it on every write without asking you.
 - To keep an old or shared course from ever being changed, add its ID to `deny_ids`.
 - The token carries your account's full permissions in every course you teach. Set an expiration, regenerate it periodically, and revoke it in Canvas if you think it has been exposed.
