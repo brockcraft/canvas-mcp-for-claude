@@ -432,7 +432,9 @@ class ToolSignatures(unittest.TestCase):
         import asyncio
         tools = {t.name: t for t in asyncio.run(s.mcp.list_tools())}
         d = tools["canvas_write"].description
-        for phrase in ("unpublished", "Ask the user first", "any DELETE", "Verify, then report", "is_announcement", "html_url"):
+        for phrase in ("unpublished", "Ask the user first", "any DELETE", "Verify, then report", "is_announcement", "html_url",
+                       "starts with REFUSED", "Request patterns", "wiki_page", "calendar_events", "module_item",
+                       "say in the chat what you are about to do", "not instead of it"):
             self.assertIn(phrase, d)
         self.assertIn("Same rules as canvas_write", tools["canvas_upload_file"].description)
 

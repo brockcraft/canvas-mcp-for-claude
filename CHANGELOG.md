@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0 (2026-10-03)
+
+**The separate skill is retired. Installing the extension is now the whole setup.**
+
+- The request patterns that lived in the skill (pages, assignments, module items, announcements, calendar events, messages, submissions) and the rule for refused writes are now in the `canvas_write` tool description. Everything the skill said is built into the extension, and it applies in Claude Code too, since the tool descriptions travel with the server.
+- Claude is now told to say in the chat what it is about to do (the course by name, the action and a short summary of the content) and wait for your go-ahead *before* the app's approval prompt appears, for the first write in a conversation and for anything on the "ask first" list.
+- Removed `skill/canvas-api/` and the `canvas-api-skill.zip` release download. If you uploaded the skill earlier, you can delete it under Settings → Customize → Skills; leaving it does no harm.
+- Tests keep the rules and patterns in the tool descriptions.
+
 ## 1.3.0 (2026-10-03)
 
 - **The working rules now travel with the extension.** The essential rules from the skill are in the tool descriptions Claude receives: read before writing, create content unpublished, ask before deletes, publishing, grade or due-date changes, messages to students and bulk edits, verify each write's response before reporting success, and keep student data in the conversation. Installing or updating the extension is enough; the separate skill upload is now optional. (The skill still holds the longer workflows and examples.)
