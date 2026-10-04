@@ -10,8 +10,5 @@ cp "$ROOT/mcpb/manifest.json" "$ROOT/mcpb/icon.png" "$ROOT/mcpb/pyproject.toml" 
 cp "$ROOT/server/canvas_mcp_server.py" "$STAGE/server/"
 npx -y @anthropic-ai/mcpb validate "$STAGE/manifest.json"
 npx -y @anthropic-ai/mcpb pack "$STAGE" "$ROOT/dist/canvas-mcp-$VERSION.mcpb"
-# The skill is uploaded to Claude separately; zip the folder for release downloads.
-rm -f "$ROOT/dist/canvas-api-skill.zip"
-(cd "$ROOT/skill" && zip -qr "$ROOT/dist/canvas-api-skill.zip" canvas-api -x '*.DS_Store')
 cp "$ROOT/dist/canvas-mcp-$VERSION.mcpb" "$ROOT/dist/canvas-mcp.mcpb"
-echo "Built dist/canvas-mcp-$VERSION.mcpb, dist/canvas-mcp.mcpb (same file, stable name for the download link) and dist/canvas-api-skill.zip"
+echo "Built dist/canvas-mcp-$VERSION.mcpb and dist/canvas-mcp.mcpb (same file, stable name for the download link)"

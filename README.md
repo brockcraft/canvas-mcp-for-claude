@@ -119,26 +119,15 @@ Claude Code uses its own config. After running the setup script:
 `claude mcp add canvas -e CANVAS_HOST=canvas.example.edu -- ~/.canvas-mcp/venv/bin/python ~/.canvas-mcp/canvas_mcp_server.py`
 Replace `canvas.example.edu` with your host.
 
-## Installing the skill (optional)
-
-The working rules Claude needs are already part of the extension: its tool descriptions tell Claude to name the course on every write, create content unpublished, ask before deletions, publishing, grade or due-date changes, messages to students and bulk edits, and check each result before saying it worked. You don't need the skill for that, and updating the extension updates those rules.
-
-`skill/canvas-api/SKILL.md` adds the longer playbook: request patterns for pages, assignments, modules, announcements and calendar events, and fuller working rules. Add it if you want that extra guidance:
-
-- **Claude app:** download `canvas-api-skill.zip` from the [latest release](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest), then open Settings → Customize → Skills and choose to upload a skill. (If you cloned this repository, you can upload `skill/canvas-api/SKILL.md` instead.)
-- **Claude Code:** copy the folder to your skills directory:
-  `cp -R skill/canvas-api ~/.claude/skills/`
-
 ## Updating
 
-**Extension:** download the newest [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and install it. Remove the old version first (Settings → Extensions → Canvas Extension → remove), then open the new file. Removing the old version clears your settings, so you will enter your Canvas host and token again. Canvas shows a token only once, so if you didn't keep it, create a new token in Canvas (and revoke the old one). If you use the optional skill, upload it again too. Then start a new chat.
+**Extension:** download the newest [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and install it. Remove the old version first (Settings → Extensions → Canvas Extension → remove), then open the new file. Removing the old version clears your settings, so you will enter your Canvas host and token again. Canvas shows a token only once, so if you didn't keep it, create a new token in Canvas (and revoke the old one). Then start a new chat. If you uploaded the Canvas skill that came with versions before 1.4.0, you can delete it under Settings → Customize → Skills; its rules are now built into the extension, and leaving it does no harm.
 
 **Setup script (connector):** to install a new version over an existing one:
 
 1. Get the new code: `git pull` in your copy of this repository, or download it again.
 2. Run `bash scripts/setup.sh`. Enter your Canvas host (or press Enter to keep the one in `CANVAS_HOST`), answer **N** when asked to replace the token (your Keychain entry is kept), and answer **N** to the config question unless your host changed. Upgrading from before 1.1.0? Your config needs a host now; see the CHANGELOG.
-3. If you use the optional skill, update it as described in "Installing the skill".
-4. Quit the Claude desktop app (Cmd+Q) and reopen it.
+3. Quit the Claude desktop app (Cmd+Q) and reopen it.
 
 Check the CHANGELOG for breaking changes before updating. Version 1.0.0 added a required `course` argument to the write tools, and version 1.1.0 removed the default Canvas host.
 
@@ -188,7 +177,7 @@ allow_ids = [12345]
 ## Recommended safeguards
 
 - In the desktop app (once installed), in the Extension's Tool Permissions, set the read-only tools (`canvas_get`, `canvas_courses`) to always allow, and the write tools (`canvas_write`, `canvas_upload_file`) to ask each time. The course guard checks which course a write goes to; asking each time lets you check what is being written.
-- Optionally install the included skill for the longer playbook (see above); the essential rules already come with the extension.
+- The working rules (confirm the course and content before a write, create things unpublished, ask before risky changes, check each result) are built into the extension, so there is nothing extra to install.
 - In each Claude project that works on a course, state the course in the project's instructions, for example "Canvas course: ABC 101 Au26". The agent then passes it on every write without asking you.
 - To keep an old or shared course from ever being changed, add its ID to `deny_ids`.
 - The token carries your account's full permissions in every course you teach. Set an expiration, regenerate it periodically, and revoke it in Canvas if you think it has been exposed.
@@ -209,7 +198,7 @@ allow_ids = [12345]
 1. **Extension:** open Settings → Extensions in the Claude desktop app and remove Canvas Extension. This also clears the host and token you entered for it.
 2. **Local connector (setup script or manual config):** remove the `"canvas"` entry from `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json` (Settings → Developer → Edit Config), then restart Claude. For Claude Code, run `claude mcp remove canvas`. Delete the token from Keychain with `security delete-generic-password -s canvas-api`, and delete the installed connector with `rm -rf ~/.canvas-mcp`.
 3. Delete the optional config file and the audit log: `rm -rf ~/.config/canvas-mcp ~/Library/Logs/canvas-mcp`
-4. Optionally, revoke the token in Canvas (Account → Settings → Approved Integrations) and remove the skill.
+4. Optionally, revoke the token in Canvas (Account → Settings → Approved Integrations) and, if you uploaded the Canvas skill that came with versions before 1.4.0, remove it under Settings → Customize → Skills.
 
 ## Files
 
@@ -217,10 +206,9 @@ allow_ids = [12345]
 |---|---|
 | `server/canvas_mcp_server.py` | The connector |
 | `mcpb/manifest.json`, `mcpb/pyproject.toml` | Definition of the Claude desktop extension |
-| `scripts/build_mcpb.sh` | Builds the extension (`dist/canvas-mcp-<version>.mcpb`) and the skill zip |
+| `scripts/build_mcpb.sh` | Builds the extension (`dist/canvas-mcp-<version>.mcpb`) |
 | `scripts/setup.sh` | One-time install and Keychain setup (setup-script route) |
 | `scripts/add_to_config.py` | Adds the connector to the Claude desktop config, with a backup |
-| `skill/canvas-api/SKILL.md` | Working rules for Claude when using Canvas |
 | `tests/test_course_guard.py` | Course guard tests, against a mocked Canvas API |
 
 ## Running tests

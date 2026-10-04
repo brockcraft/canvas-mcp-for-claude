@@ -638,6 +638,11 @@ def canvas_write(course: str, method: str, path: str, body: dict | None = None, 
     to; check it is the course the user meant.
 
     Rules for every write:
+    - Before the first write in a conversation, and before anything on the "ask first" list
+      below, say in the chat what you are about to do and wait for the user's go-ahead: the
+      course by name, the action, and a short summary of the content (for example "I'll post
+      an announcement titled 'Exam moved' to HCDE 410 A Au26. OK?"). The app's approval prompt
+      comes after this confirmation, not instead of it.
     - Read first: GET the current object before changing it, and show the user a short
       before/after for edits to existing content.
     - Create new content unpublished (published: false) unless the user says to publish.
@@ -697,8 +702,9 @@ def canvas_upload_file(course: str, endpoint: str, local_path: str, parent_folde
     local_path: absolute path on this Mac, e.g. "/Users/you/Documents/syllabus.pdf".
     parent_folder_path: Canvas folder, e.g. "course files/week1" (created if missing).
     on_duplicate: "rename" (default) or "overwrite".
-    Same rules as canvas_write: ask the user first before overwriting anything, and
-    report the resulting file's html_url.
+    Same rules as canvas_write: say in the chat which file you will upload to which course
+    and wait for the user's go-ahead (always before overwriting anything), then report the
+    resulting file's html_url.
     """
     p = os.path.expanduser(local_path)
     if not os.path.isfile(p):
