@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 (2026-10-03)
+
+- **The working rules now travel with the extension.** The essential rules from the skill are in the tool descriptions Claude receives: read before writing, create content unpublished, ask before deletes, publishing, grade or due-date changes, messages to students and bulk edits, verify each write's response before reporting success, and keep student data in the conversation. Installing or updating the extension is enough; the separate skill upload is now optional. (The skill still holds the longer workflows and examples.)
+- Claude Desktop does not show an MCP server's `instructions` to the model in chat, so the rules live in the tool descriptions instead.
+- Test that keeps those rules in the descriptions.
+
 ## 1.2.1 (2026-10-03)
 
 The connector and extension code are unchanged. If you already have 1.2.0 installed, you only need the updated skill.

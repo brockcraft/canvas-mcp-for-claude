@@ -577,6 +577,8 @@ def canvas_get(path: str, params: dict | None = None, all_pages: bool = False, m
     params: query parameters, e.g. {"per_page": 100, "include[]": ["items"]}.
     all_pages: follow Canvas pagination (Link rel="next") and return one combined list.
     max_pages: safety cap on pages fetched when all_pages is true.
+    Read before you write. Prefer narrow reads (per_page=100, include[], search_term);
+    responses over ~150k characters are truncated.
     Reference: https://canvas.instructure.com/doc/api/
     """
     with _client() as c:
@@ -632,8 +634,25 @@ def canvas_write(course: str, method: str, path: str, body: dict | None = None, 
     body: JSON body using Canvas's nested names, e.g.
           {"wiki_page": {"title": "Week 1", "body": "<p>Hi</p>", "published": false}}.
     params: optional query parameters.
-    Changes are live in Canvas. Create content unpublished unless told otherwise.
-    The result starts with a line naming the course written to; check it.
+    Changes are live in Canvas. The result starts with a line naming the course written
+    to; check it is the course the user meant.
+
+    Rules for every write:
+    - Read first: GET the current object before changing it, and show the user a short
+      before/after for edits to existing content.
+    - Create new content unpublished (published: false) unless the user says to publish.
+    - Ask the user first, every time, before: any DELETE; publishing or unpublishing;
+      changing grades, due dates or points on assignments that have submissions; messages
+      or announcements students will see; changing enrollments or sections; or any change
+      to more than about 10 objects (list them first).
+    - Verify, then report. A 200 does not prove Canvas did what you asked: it can ignore
+      fields it doesn't accept and create something different. Compare the returned object
+      with your request (for example is_announcement is true for an announcement; published,
+      dates and points match). If anything differs, tell the user exactly what now exists in
+      the course; don't call it a success and don't silently retry or clean up. When it
+      matches, report what changed with the html_url.
+    - Student data stays in the conversation; never put it anywhere shareable unless the
+      user explicitly asks.
     """
     method = method.upper()
     if method not in {"POST", "PUT", "PATCH", "DELETE"}:
@@ -658,6 +677,8 @@ def canvas_upload_file(course: str, endpoint: str, local_path: str, parent_folde
     local_path: absolute path on this Mac, e.g. "/Users/you/Documents/syllabus.pdf".
     parent_folder_path: Canvas folder, e.g. "course files/week1" (created if missing).
     on_duplicate: "rename" (default) or "overwrite".
+    Same rules as canvas_write: ask the user first before overwriting anything, and
+    report the resulting file's html_url.
     """
     p = os.path.expanduser(local_path)
     if not os.path.isfile(p):

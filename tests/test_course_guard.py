@@ -428,6 +428,14 @@ class ToolSignatures(unittest.TestCase):
             self.assertIn("ask them", tools[name].description)
         self.assertTrue(tools["canvas_courses"].annotations.readOnlyHint)
 
+    def test_essential_rules_are_in_the_write_description(self):
+        import asyncio
+        tools = {t.name: t for t in asyncio.run(s.mcp.list_tools())}
+        d = tools["canvas_write"].description
+        for phrase in ("unpublished", "Ask the user first", "any DELETE", "Verify, then report", "is_announcement", "html_url"):
+            self.assertIn(phrase, d)
+        self.assertIn("Same rules as canvas_write", tools["canvas_upload_file"].description)
+
 
 if __name__ == "__main__":
     unittest.main()
