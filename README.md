@@ -1,8 +1,10 @@
 # Canvas Connector for Claude
 
-A small local MCP connector that gives Claude access to the full Canvas LMS REST API with your personal access token. The token stays in macOS Keychain; Claude never sees it.
+A small local MCP connector that gives Claude access to the full Canvas LMS REST API with your personal access token. The token stays in your Mac's Keychain; Claude never sees it.
 
 In practice, it lets you use Claude to edit your Canvas course content by asking in plain language: change due dates, publish or unpublish items, reorganize modules, attach rubrics, draft pages and more. See "What you can do with it" for examples.
+
+**Install:** [download the extension](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and double-click it. No terminal needed. Details are in "Install the extension" below.
 
 Author: Brock Craft, Human Centered Design & Engineering, University of Washington
 
@@ -29,7 +31,7 @@ Claude's sandboxed environments (Cowork and cloud sessions) send network traffic
 
 ```
 Claude session  ──MCP──▶  connector on your Mac  ──HTTPS + token──▶  Canvas
-                           (token read from Keychain)
+                           (token kept in Keychain)
 ```
 
 ## What Claude gets
@@ -47,7 +49,7 @@ Every write names its course and goes through the course guard (see below).
 
 ## Security design
 
-- The token is stored in macOS Keychain and read at request time. It is never returned to Claude, logged, or written to a file.
+- The token is stored in macOS Keychain (by Claude Desktop for the extension, or by the setup script) and used only when a request is sent. It is never returned to Claude, logged, or written to a file by the connector.
 - Requests go only to the configured Canvas host. Requests, pagination links and redirects pointing anywhere else are refused.
 - During file uploads, the storage server receives the file but not the token.
 - `canvas_get` and `canvas_courses` are marked read-only, so the desktop app can allow them automatically while still asking before each write.
@@ -55,9 +57,9 @@ Every write names its course and goes through the course guard (see below).
 
 ## Requirements
 
-- macOS with the Claude desktop app
-- Python 3.10 or later (only for the setup script; Homebrew installs its own)
+- A Mac with the Claude desktop app (a recent version that supports extensions)
 - A Canvas access token (see "Getting a Canvas access token" below)
+- Your Canvas host: the address you sign in to Canvas at, without `https://` (for example `canvas.example.edu`). **The connector has no default host, so you must give it yours.**
 
 ## Getting a Canvas access token
 
@@ -68,76 +70,55 @@ The connector signs in to Canvas with a personal access token, sometimes called 
 3. Scroll to **Approved Integrations** and click **+ New Access Token**.
 4. Enter a purpose, such as "Claude connector", and set an expiration date. A term's length is a reasonable choice.
 5. Click **Generate Token**, then copy the token. Canvas shows it only once; if you lose it, delete it and generate a new one.
-6. Run setup right away and paste the token when prompted. Don't save it in a file, email or chat, including a chat with Claude.
+6. Install the extension right away and paste the token when it asks. Don't save it in a file, email or chat, including a chat with Claude.
 
-When the token expires, generate a new one and run `bash scripts/setup.sh` again to replace it in Keychain. To revoke a token, open the same Approved Integrations list and click the trash icon next to it.
+When the token expires, generate a new one and enter it in the extension's settings in Claude Desktop (or run `bash scripts/setup.sh` again if you used the setup script). To revoke a token, open the same Approved Integrations list and click the trash icon next to it.
 
 Some institutions turn off personal access tokens. If you don't see **+ New Access Token**, ask your Canvas administrator.
 
-## Setup
+## Install the extension (recommended)
 
-Install it one of two ways: with the setup script (easier; it asks for what it needs and does the rest) or with Homebrew (for people who already use it). For either, first get your Canvas access token (above) and know your Canvas host: the address you sign in to Canvas at, without `https://` (for example `canvas.example.edu`). **The connector has no default host, so you must give it yours.**
+1. **Download the extension:** [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb).
+2. **Open it.** Double-click the downloaded file, or drag it into the Claude desktop app. (You can also use Settings → Extensions.)
+3. **Fill in two fields** when Claude asks: your **Canvas host** and your **Canvas access token**. The token field is hidden, and Claude Desktop keeps it in your Mac's Keychain.
+4. Click **Install**, then start a new chat.
+5. **Test it** by asking Claude: "List my Canvas courses."
 
-### Option 1: Setup script (easier)
+That's all: no terminal, no Python, no editing files. To turn it off or remove it, use Settings → Extensions. Claude Desktop installs and manages the Python it needs by itself.
+
+**Already using an older install?** If you set the connector up with the setup script or by editing the config file, you will have two Canvas connectors. Remove the old one (see "Uninstall") so Claude doesn't pick between them.
+
+## Other ways to install
+
+Use these if you work in Claude Code (the terminal) or your organization has turned extensions off.
+
+### Setup script
 
 1. Clone or download this repository and open a terminal in its folder.
-2. Know your Canvas host: the address you sign in to Canvas at, without `https://` (for example `canvas.example.edu`). **The connector has no default host, so you must give it yours.** Run `bash scripts/setup.sh`. It asks for your Canvas host, installs the connector in `~/.canvas-mcp`, creates a Python environment (MCP SDK 1.x and httpx, plus tomli on Python 3.10), prompts for the token (input is hidden) and stores it in Keychain, then confirms Canvas responds with your name.
+2. Run `bash scripts/setup.sh`. It asks for your Canvas host, installs the connector in `~/.canvas-mcp`, creates a Python environment (needs Python 3.10 or later; installs MCP SDK 1.x and httpx, plus tomli on Python 3.10), prompts for the token (input is hidden) and stores it in Keychain, then confirms Canvas responds with your name.
 3. When asked, let it add the connector to the Claude desktop config. It backs up `claude_desktop_config.json` first. To do this step later, run `python3 scripts/add_to_config.py --host your.canvas.host`.
 4. Quit the Claude desktop app (Cmd+Q) and reopen it.
-5. Test it by asking Claude: "List the pages in Canvas course *course ID*."
+5. Test it by asking Claude: "List my Canvas courses."
 
-### Option 2: Homebrew (Apple Silicon Mac)
+**Your Canvas host (required).** The connector will not run without one: every tool call fails with a message asking you to set it. Setup uses the host as the Keychain account label, and `add_to_config.py` writes `"env": {"CANVAS_HOST": "canvas.example.edu"}` into the connector's config entry. If you edit the config by hand, set `CANVAS_HOST` in that `env` entry yourself, or set `host = "canvas.example.edu"` in `~/.config/canvas-mcp/config.toml`. `CANVAS_HOST` wins if both are set.
 
-1. Install it:
-   ```
-   brew install brockcraft/canvas-mcp/canvas-mcp
-   ```
-   This is tested on Apple Silicon Macs only. Homebrew no longer provides precompiled packages for Intel Macs, so an install there compiles everything and may fail; on those Macs use the setup script. Linux is untested.
-   Use the full name: Homebrew 6 and later won't load formulae from third-party taps until you trust them, and installing by full name trusts only this one formula. If you tapped first and see "Refusing to load formula from untrusted tap", run `brew trust --formula brockcraft/canvas-mcp/canvas-mcp`. Homebrew puts the connector in its own private Python environment, so it doesn't touch your system Python.
-2. Store your token in Keychain. Replace `canvas.example.edu` with your host. Input is hidden:
-   ```
-   security add-generic-password -s canvas-api -a canvas.example.edu -w
-   ```
-3. Add the connector to the Claude desktop config. Print the full path to the installed command:
-   ```
-   echo "$(brew --prefix)/bin/canvas-mcp"
-   ```
-   Claude doesn't use your shell's `PATH`, so the config needs the full path. Open `~/Library/Application Support/Claude/claude_desktop_config.json` (or Settings → Developer → Edit Config) and add this under `mcpServers`, keeping any servers already there. Use your host, and the path printed above (shown here for Apple Silicon; on Intel Macs it is `/usr/local/bin/canvas-mcp`):
-   ```json
-   {
-     "mcpServers": {
-       "canvas": {
-         "command": "/opt/homebrew/bin/canvas-mcp",
-         "env": { "CANVAS_HOST": "canvas.example.edu" }
-       }
-     }
-   }
-   ```
-4. Quit the Claude desktop app (Cmd+Q) and reopen it.
-5. Test it by asking Claude: "List the pages in Canvas course *course ID*."
+### Claude Code (terminal)
 
-For Claude Code, use: `claude mcp add canvas -e CANVAS_HOST=canvas.example.edu -- "$(brew --prefix)/bin/canvas-mcp"`
-
-The tap's source is at [brockcraft/homebrew-canvas-mcp](https://github.com/brockcraft/homebrew-canvas-mcp).
-
-**Your Canvas host (required).** The connector will not run without one: every tool call fails with a message asking you to set it. Setup uses the host as the Keychain account label, and `add_to_config.py` writes `"env": {"CANVAS_HOST": "canvas.example.edu"}` into the connector's config entry. If you install another way (Homebrew, or editing the config by hand), set `CANVAS_HOST` in that `env` entry yourself, or set `host = "canvas.example.edu"` in `~/.config/canvas-mcp/config.toml`. `CANVAS_HOST` wins if both are set.
-
-**Claude Code (terminal).** It uses its own config:
+Claude Code uses its own config. After running the setup script:
 `claude mcp add canvas -e CANVAS_HOST=canvas.example.edu -- ~/.canvas-mcp/venv/bin/python ~/.canvas-mcp/canvas_mcp_server.py`
 Replace `canvas.example.edu` with your host.
 
 ## Installing the skill
 
-`skill/canvas-api/SKILL.md` sets working rules for Claude when it uses Canvas: name the course on every write and ask rather than guess when it isn't known, confirm the course before the first change, create content unpublished, and ask before deletions, grade changes, messages to students, and bulk edits.
+`skill/canvas-api/SKILL.md` sets working rules for Claude when it uses Canvas: name the course on every write and ask rather than guess when it isn't known, confirm the course before the first change, create content unpublished, and ask before deletions, grade changes, messages to students, and bulk edits. The extension doesn't install it for you, so add it once:
 
-- **Claude app:** open Settings → Customize → Skills, choose to upload a skill, and select `skill/canvas-api/SKILL.md` (or a zip of the `canvas-api` folder).
-- **Installed with Homebrew:** the skill is at `$(brew --prefix canvas-mcp)/share/canvas-mcp/skill/canvas-api/SKILL.md`. Upload that file as above.
+- **Claude app:** download `canvas-api-skill.zip` from the [latest release](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest), then open Settings → Customize → Skills and choose to upload a skill. (If you cloned this repository, you can upload `skill/canvas-api/SKILL.md` instead.)
 - **Claude Code:** copy the folder to your skills directory:
   `cp -R skill/canvas-api ~/.claude/skills/`
 
 ## Updating
 
-**Homebrew:** run `brew update && brew upgrade canvas-mcp`, upload the skill again (it's at the path above), and quit and reopen Claude.
+**Extension:** download the newest [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and open it the same way. If Claude Desktop says the extension is already installed, remove the old one under Settings → Extensions first, then install the new file; you may need to enter your host and token again. Upload the skill again as well, then start a new chat.
 
 **Setup script:** to install a new version over an existing one:
 
@@ -146,7 +127,7 @@ Replace `canvas.example.edu` with your host.
 3. Update the skill as described in "Installing the skill".
 4. Quit the Claude desktop app (Cmd+Q) and reopen it.
 
-Check the CHANGELOG for breaking changes before updating. Version 1.0.0 added a required `course` argument to the write tools.
+Check the CHANGELOG for breaking changes before updating. Version 1.0.0 added a required `course` argument to the write tools, and version 1.1.0 removed the default Canvas host.
 
 ## Course guard
 
@@ -203,27 +184,28 @@ allow_ids = [12345]
 ## Limitations
 
 - The Mac must be awake with the Claude desktop app open.
-- macOS only as written. On other systems the connector falls back to a token file at `~/.canvas/token` (set permissions to 600).
+- macOS only as written. With the setup script, other systems can fall back to a token file at `~/.canvas/token` (set permissions to 600), but this is untested.
 - Sessions opened before installation may need to refresh their tool list before the Canvas tools appear.
 - Responses longer than 150,000 characters are truncated; narrow requests with `per_page`, `include[]` or `search_term`.
-- Built on MCP Python SDK 1.x. Version 2 renamed `FastMCP`, so the setup script pins `mcp<2`.
+- Built on MCP Python SDK 1.x. Version 2 renamed `FastMCP`, so the extension and the setup script pin `mcp<2`.
 - Writes to paths the course guard can't attribute to a course are refused, including replies to existing conversations (`conversations/:id/...`) and account-level paths. Add a prefix to `unscoped_allow_prefixes` only if you accept that those writes skip the course check.
 - The course list comes from Canvas's default course listing. A course that isn't in it can't be written to.
 
 ## Uninstall
 
-1. Remove the `"canvas"` entry from `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json` (Settings → Developer → Edit Config), then restart Claude. For Claude Code, run `claude mcp remove canvas`.
-2. Delete the token from Keychain: `security delete-generic-password -s canvas-api`
-3. Delete the installed connector: `rm -rf ~/.canvas-mcp` (setup script), or `brew uninstall canvas-mcp && brew untap brockcraft/canvas-mcp` (Homebrew)
-4. Delete the optional config file and the audit log: `rm -rf ~/.config/canvas-mcp ~/Library/Logs/canvas-mcp`
-5. Optionally, revoke the token in Canvas (Account → Settings → Approved Integrations) and remove the skill.
+1. **Extension:** open Settings → Extensions in the Claude desktop app and remove Canvas Connector. This also clears the token Claude Desktop stored for it.
+2. **Setup script or manual config:** remove the `"canvas"` entry from `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json` (Settings → Developer → Edit Config), then restart Claude. For Claude Code, run `claude mcp remove canvas`. Delete the token from Keychain with `security delete-generic-password -s canvas-api`, and delete the installed connector with `rm -rf ~/.canvas-mcp`.
+3. Delete the optional config file and the audit log: `rm -rf ~/.config/canvas-mcp ~/Library/Logs/canvas-mcp`
+4. Optionally, revoke the token in Canvas (Account → Settings → Approved Integrations) and remove the skill.
 
 ## Files
 
 | File | Purpose |
 |---|---|
 | `server/canvas_mcp_server.py` | The connector |
-| `scripts/setup.sh` | One-time install and Keychain setup |
+| `mcpb/manifest.json`, `mcpb/pyproject.toml` | Definition of the Claude desktop extension |
+| `scripts/build_mcpb.sh` | Builds the extension (`dist/canvas-mcp-<version>.mcpb`) and the skill zip |
+| `scripts/setup.sh` | One-time install and Keychain setup (setup-script route) |
 | `scripts/add_to_config.py` | Adds the connector to the Claude desktop config, with a backup |
 | `skill/canvas-api/SKILL.md` | Working rules for Claude when using Canvas |
 | `tests/test_course_guard.py` | Course guard tests, against a mocked Canvas API |

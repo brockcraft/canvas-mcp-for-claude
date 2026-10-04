@@ -9,6 +9,7 @@
     "name": "Brock Craft",
     "url": "https://github.com/brockcraft"
   },
+  "icon": "icon.png",
   "homepage": "https://github.com/brockcraft/canvas-mcp-for-claude",
   "documentation": "https://github.com/brockcraft/canvas-mcp-for-claude#readme",
   "support": "https://github.com/brockcraft/canvas-mcp-for-claude/issues",
