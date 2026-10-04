@@ -653,6 +653,26 @@ def canvas_write(course: str, method: str, path: str, body: dict | None = None, 
       matches, report what changed with the html_url.
     - Student data stays in the conversation; never put it anywhere shareable unless the
       user explicitly asks.
+    - If the result starts with REFUSED, stop and ask the user which course they mean
+      (show the candidates in the message). Don't retry with a different course, path or
+      label on your own.
+
+    Request patterns (paths relative to /api/v1; dates are ISO 8601 with the local UTC
+    offset). When unsure of an endpoint or parameter name, read
+    https://canvas.instructure.com/doc/api/ instead of guessing.
+    - Page: POST courses/:id/pages {"wiki_page": {"title": "...", "body": "<p>...</p>",
+      "published": false}}; edit with PUT courses/:id/pages/:url_or_id.
+    - Assignment: POST courses/:id/assignments {"assignment": {"name": "...",
+      "points_possible": 10, "due_at": "2026-10-15T23:59:00-07:00",
+      "submission_types": ["online_upload"], "published": false}}.
+    - Module item: POST courses/:id/modules/:module_id/items {"module_item":
+      {"type": "Page", "page_url": "..."}}.
+    - Announcement (ask first): POST courses/:id/discussion_topics {"title": "...",
+      "message": "<p>...</p>", "is_announcement": true, "published": false}.
+    - Calendar event: POST calendar_events with "context_code": "course_:id" inside
+      calendar_event. Message (ask first): POST conversations with a top-level
+      "context_code": "course_:id". The connector checks the course from context_code.
+    - Submissions (read): GET courses/:id/assignments/:aid/submissions with include[]=user.
     """
     method = method.upper()
     if method not in {"POST", "PUT", "PATCH", "DELETE"}:
