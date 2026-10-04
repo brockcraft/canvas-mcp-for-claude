@@ -183,7 +183,7 @@ allow_ids = [12345]
 
 ## Recommended safeguards
 
-- In the desktop app, set the read-only tools (`canvas_get`, `canvas_courses`) to always allow, and the write tools (`canvas_write`, `canvas_upload_file`) to ask each time. The course guard checks which course a write goes to; asking each time lets you check what is being written.
+- In the desktop app (once installed), the Extension's Tool Permissions, set the read-only tools (`canvas_get`, `canvas_courses`) to always allow, and the write tools (`canvas_write`, `canvas_upload_file`) to ask each time. The course guard checks which course a write goes to; asking each time lets you check what is being written.
 - Install the included skill (see above).
 - In each Claude project that works on a course, state the course in the project's instructions, for example "Canvas course: ABC 101 Au26". The agent then passes it on every write without asking you.
 - To keep an old or shared course from ever being changed, add its ID to `deny_ids`.
