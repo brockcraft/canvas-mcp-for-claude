@@ -82,10 +82,9 @@ Install it one of two ways: with Homebrew (no clone, no setup script) or with th
 
 1. Install it:
    ```
-   brew tap brockcraft/canvas-mcp
-   brew install canvas-mcp
+   brew install brockcraft/canvas-mcp/canvas-mcp
    ```
-   Homebrew puts the connector in its own private Python environment, so it doesn't touch your system Python.
+   Use the full name: Homebrew 6 and later won't load formulae from third-party taps until you trust them, and installing by full name trusts only this one formula. If you tapped first and see "Refusing to load formula from untrusted tap", run `brew trust --formula brockcraft/canvas-mcp/canvas-mcp`. Homebrew puts the connector in its own private Python environment, so it doesn't touch your system Python.
 2. Store your token in Keychain. Replace `canvas.example.edu` with your host. Input is hidden:
    ```
    security add-generic-password -s canvas-api -a canvas.example.edu -w
