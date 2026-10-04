@@ -1,5 +1,7 @@
 # Canvas Extension for Claude
 
+[![Tests](https://github.com/brockcraft/canvas-mcp-for-claude/actions/workflows/tests.yml/badge.svg)](https://github.com/brockcraft/canvas-mcp-for-claude/actions/workflows/tests.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A Canvas extension for the Claude desktop app. It is a small local MCP server that gives Claude access to the full Canvas LMS REST API with your personal access token. The token stays in your Mac's Keychain; Claude never sees it.
 
 In practice, it lets you use Claude to edit your Canvas course content by asking in plain language: change due dates, publish or unpublish items, reorganize modules, attach rubrics, draft pages and more. See "What you can do with it" for examples.
