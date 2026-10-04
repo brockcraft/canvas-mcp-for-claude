@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest an improvement
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This connector is deliberately small: four general tools that reach the whole Canvas API, plus a course guard on every write. Requests that fit that design are the easiest to accept. If you want many ready-made tools for specific jobs, the "Related projects" section of the README lists other options.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the task or problem, not just the solution. Don't include student information.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like to see?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What have you tried instead?
+      description: For example, asking Claude to do it with the existing tools.

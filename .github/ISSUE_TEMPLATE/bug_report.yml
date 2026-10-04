@@ -1,0 +1,64 @@
+name: Bug report
+description: Something doesn't work, or works differently than the README says
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. **Do not paste your Canvas token, student names, grades or other student data.** Describe or redact them. For security problems, use the private link on the issue chooser instead.
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options:
+        - Claude Desktop extension (.mcpb)
+        - Setup script (scripts/setup.sh)
+        - Edited the Claude config by hand
+        - Claude Code
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The release you installed, for example 1.2.0. In Claude Desktop, see Settings → Extensions.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Mac and Claude app
+      description: macOS version, chip (Apple Silicon or Intel), and Claude Desktop version
+      placeholder: "macOS 26.5, Apple Silicon, Claude Desktop 1.x"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you asked Claude to do, what happened instead, and any error message. Remove names, IDs you don't want to share, and any token.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log lines (optional)
+      description: |
+        Claude Desktop's log for the extension is in ~/Library/Logs/Claude/ (the file starting "mcp-server-"). The connector's audit log is ~/Library/Logs/canvas-mcp/writes.jsonl (it records no values). Paste only the relevant lines, with anything private removed.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I removed any token and any student information from this report.
+          required: true
+        - label: I'm using the latest release, or I checked that the problem still happens on it.
+          required: false

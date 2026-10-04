@@ -1,0 +1,55 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Unit tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: python -m pip install "mcp>=1.10,<2" httpx "tomli; python_version < '3.11'"
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
+  extension:
+    name: Build the Claude Desktop extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check that the versions agree
+        run: |
+          python3 - <<'PY'
+          import json, re, sys, tomllib
+          manifest = json.load(open("mcpb/manifest.json"))["version"]
+          pyproject = tomllib.load(open("mcpb/pyproject.toml", "rb"))["project"]["version"]
+          changelog = re.search(r"^## (\d+\.\d+\.\d+)", open("CHANGELOG.md").read(), re.M).group(1)
+          print(f"manifest {manifest}, pyproject {pyproject}, latest CHANGELOG entry {changelog}")
+          if len({manifest, pyproject, changelog}) != 1:
+              sys.exit("Version mismatch: update mcpb/manifest.json, mcpb/pyproject.toml and CHANGELOG.md together.")
+          PY
+      - name: Validate and pack
+        run: bash scripts/build_mcpb.sh
+      - name: Keep the built files for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-build
+          path: dist/
+          retention-days: 7
