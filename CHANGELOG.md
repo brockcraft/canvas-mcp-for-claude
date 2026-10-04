@@ -2,7 +2,7 @@
 
 ## 1.2.0 (2026-10-03)
 
-- **Claude desktop extension.** The connector now installs as a `.mcpb` extension: download it, double-click it, and enter your Canvas host and token in Claude Desktop. Claude Desktop keeps the token in your Mac's Keychain and manages the Python environment itself. This is now the recommended install; the setup script remains for Claude Code and for organizations that have turned extensions off.
+- **Canvas extension for Claude Desktop.** It now installs as a `.mcpb` extension: download it, double-click it, and enter your Canvas host and token in Claude Desktop. Claude Desktop keeps the token in your Mac's Keychain and manages the Python environment itself. This is now the recommended install; the setup script remains for Claude Code and for organizations that have turned extensions off.
 - The server also reads the token from the `CANVAS_API_TOKEN` environment variable (which the extension sets) before Keychain and `~/.canvas/token`.
 - `scripts/build_mcpb.sh` builds the extension and a zip of the skill for release downloads.
 - Tests for the token sources.

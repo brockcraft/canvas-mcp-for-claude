@@ -1,10 +1,10 @@
 {
   "manifest_version": "0.4",
   "name": "canvas-mcp",
-  "display_name": "Canvas Connector",
+  "display_name": "Canvas Extension",
   "version": "1.2.0",
-  "description": "Lets Claude read and edit your Canvas LMS courses, with a course guard on every change.",
-  "long_description": "A local connector that gives Claude access to the Canvas LMS REST API with your personal access token. Ask Claude to change due dates, publish or unpublish items, reorganize modules, attach rubrics and draft pages. Every write names its course and is checked before it is sent. Your token is stored in your Mac's Keychain and is never shown to Claude.",
+  "description": "A Canvas extension for Claude: read and edit your Canvas LMS courses, with a course guard on every change.",
+  "long_description": "A Canvas extension that gives Claude access to the Canvas LMS REST API with your personal access token. Ask Claude to change due dates, publish or unpublish items, reorganize modules, attach rubrics and draft pages. Every write names its course and is checked before it is sent. Your token is stored in your Mac's Keychain and is never shown to Claude.",
   "author": {
     "name": "Brock Craft",
     "url": "https://github.com/brockcraft"

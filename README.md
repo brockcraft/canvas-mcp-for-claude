@@ -1,10 +1,12 @@
-# Canvas Connector for Claude
+# Canvas Extension for Claude
 
-A small local MCP connector that gives Claude access to the full Canvas LMS REST API with your personal access token. The token stays in your Mac's Keychain; Claude never sees it.
+A Canvas extension for the Claude desktop app. It is a small local MCP server that gives Claude access to the full Canvas LMS REST API with your personal access token. The token stays in your Mac's Keychain; Claude never sees it.
 
 In practice, it lets you use Claude to edit your Canvas course content by asking in plain language: change due dates, publish or unpublish items, reorganize modules, attach rubrics, draft pages and more. See "What you can do with it" for examples.
 
-**Install:** [download the extension](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and double-click it. No terminal needed. Details are in "Install the extension" below.
+It installs two ways: as a **Claude Desktop extension** (recommended, one click) or as a **local connector** for Claude Code and other setups (see "Other ways to install"). Elsewhere in this README, "the connector" means the software itself, however you installed it.
+
+**Install:** [download the Canvas extension](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and double-click it. No terminal needed. Details are in "Install the extension" below.
 
 Author: Brock Craft, Human Centered Design & Engineering, University of Washington
 
@@ -68,7 +70,7 @@ The connector signs in to Canvas with a personal access token, sometimes called 
 1. Sign in to Canvas in a web browser.
 2. Click **Account** in the left navigation, then **Settings**.
 3. Scroll to **Approved Integrations** and click **+ New Access Token**.
-4. Enter a purpose, such as "Claude connector", and set an expiration date. A term's length is a reasonable choice.
+4. Enter a purpose, such as "Claude Canvas extension", and set an expiration date. A term's length is a reasonable choice.
 5. Click **Generate Token**, then copy the token. Canvas shows it only once; if you lose it, delete it and generate a new one.
 6. Install the extension right away and paste the token when it asks. Don't save it in a file, email or chat, including a chat with Claude.
 
@@ -76,23 +78,23 @@ When the token expires, generate a new one and enter it in the extension's setti
 
 Some institutions turn off personal access tokens. If you don't see **+ New Access Token**, ask your Canvas administrator.
 
-## Install the extension (recommended)
+## Install the Canvas extension (recommended)
 
-1. **Download the extension:** [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb).
+1. **Download the Canvas extension:** [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb).
 2. **Open it.** Double-click the downloaded file, or drag it into the Claude desktop app. (You can also use Settings → Extensions.)
 3. **Fill in two fields** when Claude asks: your **Canvas host** and your **Canvas access token**. The token field is hidden, and Claude Desktop keeps it in your Mac's Keychain.
 4. Click **Install**, then start a new chat.
 5. **Test it** by asking Claude: "List my Canvas courses."
 
-That's all: no terminal, no Python, no editing files. To turn it off or remove it, use Settings → Extensions. Claude Desktop installs and manages the Python it needs by itself.
+That's all: no terminal, no Python, no editing files. To turn it off or remove it, use Settings → Extensions (it appears as "Canvas Extension"). Claude Desktop installs and manages the Python it needs by itself.
 
-**Already using an older install?** If you set the connector up with the setup script or by editing the config file, you will have two Canvas connectors. Remove the old one (see "Uninstall") so Claude doesn't pick between them.
+**Already using an older install?** If you set it up earlier as a local connector (with the setup script or by editing the config file), you will have both the extension and the connector. Remove the old connector (see "Uninstall") so Claude doesn't pick between them.
 
-## Other ways to install
+## Other ways to install (as a local connector)
 
-Use these if you work in Claude Code (the terminal) or your organization has turned extensions off.
+These install the same software as a local MCP connector instead of an extension. Use them if you work in Claude Code (the terminal) or your organization has turned extensions off.
 
-### Setup script
+### Setup script (installs the connector)
 
 1. Clone or download this repository and open a terminal in its folder.
 2. Run `bash scripts/setup.sh`. It asks for your Canvas host, installs the connector in `~/.canvas-mcp`, creates a Python environment (needs Python 3.10 or later; installs MCP SDK 1.x and httpx, plus tomli on Python 3.10), prompts for the token (input is hidden) and stores it in Keychain, then confirms Canvas responds with your name.
@@ -118,9 +120,9 @@ Replace `canvas.example.edu` with your host.
 
 ## Updating
 
-**Extension:** download the newest [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and open it the same way. If Claude Desktop says the extension is already installed, remove the old one under Settings → Extensions first, then install the new file; you may need to enter your host and token again. Upload the skill again as well, then start a new chat.
+**Extension:** download the newest [canvas-mcp.mcpb](https://github.com/brockcraft/canvas-mcp-for-claude/releases/latest/download/canvas-mcp.mcpb) and install it. Remove the old version first (Settings → Extensions → Canvas Extension → remove), then open the new file. Removing the old version clears your settings, so you will enter your Canvas host and token again. Canvas shows a token only once, so if you didn't keep it, create a new token in Canvas (and revoke the old one). Upload the skill again as well, then start a new chat.
 
-**Setup script:** to install a new version over an existing one:
+**Setup script (connector):** to install a new version over an existing one:
 
 1. Get the new code: `git pull` in your copy of this repository, or download it again.
 2. Run `bash scripts/setup.sh`. Enter your Canvas host (or press Enter to keep the one in `CANVAS_HOST`), answer **N** when asked to replace the token (your Keychain entry is kept), and answer **N** to the config question unless your host changed. Upgrading from before 1.1.0? Your config needs a host now; see the CHANGELOG.
@@ -193,8 +195,8 @@ allow_ids = [12345]
 
 ## Uninstall
 
-1. **Extension:** open Settings → Extensions in the Claude desktop app and remove Canvas Connector. This also clears the token Claude Desktop stored for it.
-2. **Setup script or manual config:** remove the `"canvas"` entry from `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json` (Settings → Developer → Edit Config), then restart Claude. For Claude Code, run `claude mcp remove canvas`. Delete the token from Keychain with `security delete-generic-password -s canvas-api`, and delete the installed connector with `rm -rf ~/.canvas-mcp`.
+1. **Extension:** open Settings → Extensions in the Claude desktop app and remove Canvas Extension. This also clears the host and token you entered for it.
+2. **Local connector (setup script or manual config):** remove the `"canvas"` entry from `mcpServers` in `~/Library/Application Support/Claude/claude_desktop_config.json` (Settings → Developer → Edit Config), then restart Claude. For Claude Code, run `claude mcp remove canvas`. Delete the token from Keychain with `security delete-generic-password -s canvas-api`, and delete the installed connector with `rm -rf ~/.canvas-mcp`.
 3. Delete the optional config file and the audit log: `rm -rf ~/.config/canvas-mcp ~/Library/Logs/canvas-mcp`
 4. Optionally, revoke the token in Canvas (Account → Settings → Approved Integrations) and remove the skill.
 
