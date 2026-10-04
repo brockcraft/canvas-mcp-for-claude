@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 (2026-10-03)
+
+**Breaking:** the Canvas host no longer defaults to `canvas.uw.edu`. You must set it, or every tool call fails with a message saying so.
+
+- Set the host with the `CANVAS_HOST` environment variable (in the connector's `env` entry in the Claude config) or `host` in `~/.config/canvas-mcp/config.toml`. `CANVAS_HOST` wins if both are set.
+- `setup.sh` now requires a host. `add_to_config.py` requires `--host` and always writes `CANVAS_HOST` into the config entry.
+- **If you installed before 1.1.0 with the old default host:** re-run `python3 scripts/add_to_config.py --host your.canvas.host`, or add `"env": {"CANVAS_HOST": "your.canvas.host"}` to the `canvas` entry by hand, then restart Claude.
+
 ## 1.0.1 (2026-10-03)
 
 - Audit log: `result_id` is now filled in for pages, which Canvas returns with `page_id` instead of `id`.

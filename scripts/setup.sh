@@ -3,12 +3,13 @@
 set -e
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="$HOME/.canvas-mcp"
-DEFAULT_HOST="canvas.uw.edu"
 
 # 0. Canvas host
-read -p "Canvas host [${CANVAS_HOST:-$DEFAULT_HOST}]: " HOST
-HOST="${HOST:-${CANVAS_HOST:-$DEFAULT_HOST}}"
+# There is no default: this must be your institution's Canvas host, e.g. canvas.example.edu
+read -p "Your Canvas host (e.g. canvas.example.edu)${CANVAS_HOST:+ [$CANVAS_HOST]}: " HOST
+HOST="${HOST:-$CANVAS_HOST}"
 HOST="${HOST#https://}"; HOST="${HOST#http://}"; HOST="${HOST%%/*}"
+if [ -z "$HOST" ]; then echo "A Canvas host is required."; exit 1; fi
 echo "Using Canvas host: $HOST"
 
 mkdir -p "$DEST" && chmod 700 "$DEST"

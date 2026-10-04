@@ -12,8 +12,8 @@ Writes go through a course guard: each write names its course, the connector
 checks that the path belongs to that course and that the course is live, and
 every attempt is recorded (keys only, no values) in a local audit log.
 
-The Canvas host comes from the CANVAS_HOST environment variable (default
-canvas.uw.edu). The token is read from macOS Keychain (service "canvas-api")
+The Canvas host is required: set the CANVAS_HOST environment variable, or `host`
+in ~/.config/canvas-mcp/config.toml. There is no default. The token is read from macOS Keychain (service "canvas-api")
 at request time and is never returned to Claude, logged, or sent to any host
 but Canvas. Optional settings live in ~/.config/canvas-mcp/config.toml.
 """
@@ -32,8 +32,6 @@ except ModuleNotFoundError:  # Python 3.10
     except ModuleNotFoundError:
         tomllib = None
 
-HOST = os.environ.get("CANVAS_HOST", "canvas.uw.edu")
-BASE = f"https://{HOST}/api/v1"
 KEYCHAIN_SERVICE = "canvas-api"
 MAX_CHARS = 150_000  # keep responses within what Claude can read
 
@@ -51,6 +49,7 @@ class ConfigError(Exception):
 
 
 CONFIG_DEFAULTS = {
+    "host": "",  # Canvas host, e.g. canvas.example.edu; the CANVAS_HOST environment variable takes precedence
     "writable_roles": ["teacher"],
     "archived_prefix": "ARCHIVED:",
     "allow_ids": [],
@@ -117,7 +116,7 @@ def _check_config(cfg: dict) -> dict:
     if not str(cfg["course_cache_seconds"]).isdigit():
         raise ConfigError("course_cache_seconds must be a whole number of seconds.")
     cfg["course_cache_seconds"] = int(cfg["course_cache_seconds"])
-    for key in ("archived_prefix", "audit_log_path"):
+    for key in ("host", "archived_prefix", "audit_log_path"):
         if not isinstance(cfg[key], str):
             raise ConfigError(f"{key} must be a string.")
     cfg["audit_log_path"] = os.path.expanduser(cfg["audit_log_path"])
@@ -131,6 +130,22 @@ except ConfigError as e:  # reads still work; every write is refused until the c
 
 
 # ---------------------------------------------------------------- HTTP
+
+def _normalize_host(raw: str) -> str:
+    h = raw.strip()
+    for prefix in ("https://", "http://"):
+        if h.lower().startswith(prefix):
+            h = h[len(prefix):]
+    return h.split("/")[0].strip().lower()
+
+
+HOST = _normalize_host(os.environ.get("CANVAS_HOST") or CFG["host"])  # "" until configured
+BASE = f"https://{HOST}/api/v1"
+NO_HOST_MESSAGE = ("No Canvas host is configured. Set CANVAS_HOST to your institution's Canvas host "
+                   "(for example canvas.example.edu) in the connector's env entry in the Claude config, "
+                   "or set host = \"canvas.example.edu\" in ~/.config/canvas-mcp/config.toml, "
+                   "then restart Claude.")
+
 
 def _token() -> str:
     try:
@@ -148,6 +163,8 @@ def _token() -> str:
 
 def _url(path: str) -> str:
     """Accept 'courses/1/pages', '/api/v1/courses/1/pages' or a full canvas URL; refuse other hosts."""
+    if not HOST:
+        raise RuntimeError(NO_HOST_MESSAGE)
     path = path.strip()
     if path.startswith("http"):
         u = urlparse(path)
@@ -160,6 +177,8 @@ def _url(path: str) -> str:
 
 
 def _client() -> httpx.Client:
+    if not HOST:
+        raise RuntimeError(NO_HOST_MESSAGE)
     return httpx.Client(headers={"Authorization": f"Bearer {_token()}", "Accept": "application/json"},
                         timeout=60, follow_redirects=False)
 

@@ -1,26 +1,29 @@
 #!/usr/bin/env python3
 """Adds the Canvas connector to Claude's desktop config. Backs up the original first.
 
-Usage: python3 scripts/add_to_config.py [--host canvas.example.edu]
+Usage: python3 scripts/add_to_config.py --host canvas.example.edu
 """
 import argparse, json, os, shutil, sys
 from datetime import datetime
 
-DEFAULT_HOST = "canvas.uw.edu"
-
 ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-ap.add_argument("--host", default=os.environ.get("CANVAS_HOST", DEFAULT_HOST),
-                help=f"Canvas host (default {DEFAULT_HOST})")
-host = ap.parse_args().host.strip()
+ap.add_argument("--host", default=os.environ.get("CANVAS_HOST"),
+                help="your Canvas host, e.g. canvas.example.edu (required; or set CANVAS_HOST)")
+host = (ap.parse_args().host or "").strip()
+for prefix in ("https://", "http://"):
+    if host.lower().startswith(prefix):
+        host = host[len(prefix):]
+host = host.split("/")[0]
+if not host:
+    ap.error("--host is required, e.g. --host canvas.example.edu")
 
 cfg = os.path.expanduser("~/Library/Application Support/Claude/claude_desktop_config.json")
 home = os.path.expanduser("~")
 entry = {
     "command": f"{home}/.canvas-mcp/venv/bin/python",
     "args": [f"{home}/.canvas-mcp/canvas_mcp_server.py"],
+    "env": {"CANVAS_HOST": host},
 }
-if host != DEFAULT_HOST:
-    entry["env"] = {"CANVAS_HOST": host}
 
 data = {}
 if os.path.exists(cfg):

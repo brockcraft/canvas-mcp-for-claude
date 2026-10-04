@@ -58,16 +58,16 @@ Some institutions turn off personal access tokens. If you don't see **+ New Acce
 ## Setup
 
 1. Clone or download this repository and open a terminal in its folder.
-2. Run `bash scripts/setup.sh`. It asks for your Canvas host (default `canvas.uw.edu`), installs the connector in `~/.canvas-mcp`, creates a Python environment (MCP SDK 1.x and httpx, plus tomli on Python 3.10), prompts for the token (input is hidden) and stores it in Keychain, then confirms Canvas responds with your name.
+2. Know your Canvas host: the address you sign in to Canvas at, without `https://` (for example `canvas.example.edu`). **The connector has no default host, so you must give it yours.** Run `bash scripts/setup.sh`. It asks for your Canvas host, installs the connector in `~/.canvas-mcp`, creates a Python environment (MCP SDK 1.x and httpx, plus tomli on Python 3.10), prompts for the token (input is hidden) and stores it in Keychain, then confirms Canvas responds with your name.
 3. When asked, let it add the connector to the Claude desktop config. It backs up `claude_desktop_config.json` first. To do this step later, run `python3 scripts/add_to_config.py --host your.canvas.host`.
 4. Quit the Claude desktop app (Cmd+Q) and reopen it.
 5. Test it by asking Claude: "List the pages in Canvas course *course ID*."
 
-**Other Canvas instances.** Enter your institution's host (for example `canvas.example.edu`) when setup asks. The host is used as the Keychain account label, and `add_to_config.py` adds `"env": {"CANVAS_HOST": "canvas.example.edu"}` to the connector's config entry. No `env` entry is added for the default host.
+**Your Canvas host (required).** The connector will not run without one: every tool call fails with a message asking you to set it. Setup uses the host as the Keychain account label, and `add_to_config.py` writes `"env": {"CANVAS_HOST": "canvas.example.edu"}` into the connector's config entry. If you install another way (Homebrew, or editing the config by hand), set `CANVAS_HOST` in that `env` entry yourself, or set `host = "canvas.example.edu"` in `~/.config/canvas-mcp/config.toml`. `CANVAS_HOST` wins if both are set.
 
 **Claude Code (terminal).** It uses its own config:
-`claude mcp add canvas -- ~/.canvas-mcp/venv/bin/python ~/.canvas-mcp/canvas_mcp_server.py`
-For a host other than the default, add `-e CANVAS_HOST=canvas.example.edu` before `--`.
+`claude mcp add canvas -e CANVAS_HOST=canvas.example.edu -- ~/.canvas-mcp/venv/bin/python ~/.canvas-mcp/canvas_mcp_server.py`
+Replace `canvas.example.edu` with your host.
 
 ## Installing the skill
 
@@ -82,7 +82,7 @@ For a host other than the default, add `-e CANVAS_HOST=canvas.example.edu` befor
 To install a new version over an existing one:
 
 1. Get the new code: `git pull` in your copy of this repository, or download it again.
-2. Run `bash scripts/setup.sh`. Press Enter to keep your Canvas host, answer **N** when asked to replace the token (your Keychain entry is kept), and answer **N** to the config question unless your host changed.
+2. Run `bash scripts/setup.sh`. Enter your Canvas host (or press Enter to keep the one in `CANVAS_HOST`), answer **N** when asked to replace the token (your Keychain entry is kept), and answer **N** to the config question unless your host changed. Upgrading from before 1.1.0? Your config needs a host now; see the CHANGELOG.
 3. Update the skill as described in "Installing the skill".
 4. Quit the Claude desktop app (Cmd+Q) and reopen it.
 
@@ -113,6 +113,7 @@ Every write result starts with a line naming the course, so a mistake is visible
 
 | Key | Default | Purpose |
 |---|---|---|
+| `host` | none (required) | Your Canvas host, e.g. `canvas.example.edu`; the `CANVAS_HOST` environment variable overrides it |
 | `writable_roles` | `["teacher"]` | Enrollment types that may write, e.g. add `"ta"` or `"designer"` |
 | `archived_prefix` | `"ARCHIVED:"` | Name prefix that marks a course read-only; `""` turns this check off |
 | `allow_ids` | `[]` | Courses that are always writable, such as a sandbox course |

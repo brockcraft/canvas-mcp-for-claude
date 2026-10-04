@@ -381,6 +381,31 @@ class Config(GuardTest):
                          s._default_log_path({}))
 
 
+class HostRequired(unittest.TestCase):
+    def test_normalize_host(self):
+        self.assertEqual(s._normalize_host(" https://Canvas.Example.edu/courses/1 "), "canvas.example.edu")
+        self.assertEqual(s._normalize_host(""), "")
+
+    def test_no_default_host(self):
+        self.assertEqual(s.CONFIG_DEFAULTS["host"], "")
+        with open(s.__file__) as f:
+            self.assertNotIn("uw.edu", f.read())
+
+    def test_host_from_config_file(self):
+        path = os.path.join(tempfile.mkdtemp(), "config.toml")
+        with open(path, "w") as f:
+            f.write('host = "canvas.example.edu"\n')
+        self.assertEqual(s.load_config(env={"CANVAS_MCP_CONFIG": path})["host"], "canvas.example.edu")
+
+    def test_unconfigured_host_refuses_everything(self):
+        with mock.patch.object(s, "HOST", ""):
+            for call in (lambda: s._client(), lambda: s._url("courses"),
+                         lambda: s._url("https://canvas.example.edu/api/v1/courses")):
+                with self.assertRaises(RuntimeError) as cm:
+                    call()
+                self.assertIn("CANVAS_HOST", str(cm.exception))
+
+
 class ToolSignatures(unittest.TestCase):
     def test_course_is_required(self):
         import asyncio
