@@ -88,6 +88,13 @@ Some institutions turn off personal access tokens. If you don't see **+ New Acce
 
 That's all: no terminal, no Python, no editing files. To turn it off or remove it, use Settings → Extensions (it appears as "Canvas Extension"). Claude Desktop installs and manages the Python it needs by itself.
 
+**You will see a warning when you install it.** Claude Desktop shows: "Installing will grant this extension access to everything on your computer. Any developer information shown has not been verified by Anthropic. Ensure you trust the source of this extension before installation." It shows this for every extension that is not in Anthropic's own directory, and this one is not. It is accurate in general: an extension runs on your Mac with your user account's permissions. Here is what this one does with that, so you can decide:
+
+- The source is in this repository and the server is a single file, `server/canvas_mcp_server.py`. The extension is built from it by `scripts/build_mcpb.sh`, so you can read the code and rebuild the bundle yourself.
+- It sends requests only to the Canvas host you enter. Links, pagination and redirects to anywhere else are refused in code.
+- It reads a file from your Mac only when Claude uploads one to a course, and writes only an audit log (`~/Library/Logs/canvas-mcp/`) that holds no values or tokens. Each write asks for your approval in Claude.
+- Only install a copy downloaded from this repository's [releases page](https://github.com/brockcraft/canvas-mcp-for-claude/releases). Don't open a `.mcpb` file someone sent you.
+
 **Already using an older install?** If you set it up earlier as a local connector (with the setup script or by editing the config file), you will have both the extension and the connector. Remove the old connector (see "Uninstall") so Claude doesn't pick between them.
 
 ## Other ways to install (as a local connector)
