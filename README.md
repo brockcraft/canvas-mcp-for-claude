@@ -138,15 +138,6 @@ Replace `canvas.example.edu` with your host.
 
 Check the CHANGELOG for breaking changes before updating. Version 1.0.0 added a required `course` argument to the write tools, and version 1.1.0 removed the default Canvas host.
 
-## Related projects
-
-Other open-source projects also connect Claude to Canvas. This list is not exhaustive, and I have not tested the others; their own READMEs are the best guide.
-
-- **[vishalsachdev/canvas-mcp](https://github.com/vishalsachdev/canvas-mcp)** is the most widely used. It is a broad suite of about 100 purpose-built tools for students and educators, including grading, messaging, accessibility scanning, optional anonymization of student data, and workflow skills. It works with many AI clients and also installs as a one-click Claude Desktop extension. If you want ready-made tools for particular jobs, start there.
-- **This project** is deliberately small: four generic tools that reach the whole Canvas API, in one readable server file of about 700 lines. Its distinguishing feature is the course guard: every write must name a live course and is refused if the path belongs to a different one (see "Course guard"). If you want a small connector you can read in an afternoon, with that check on every write, use this.
-
-More are on GitHub; search for "canvas mcp".
-
 ## Course guard
 
 The connector can't tell which course you mean from a path like `courses/12345/pages/x`. An agent without context might pick a plausible course, reuse an old ID from notes, or confuse two terms of the same course. The course guard stops these mistakes before anything is sent to Canvas.
@@ -235,6 +226,15 @@ The tests use a mocked Canvas API: no network access, no token, no Keychain. Fro
 ```
 ~/.canvas-mcp/venv/bin/python -m unittest discover -s tests
 ```
+
+## Related projects
+
+Other open-source projects also connect Claude to Canvas. This list is not exhaustive, and I have not tested the others; their own READMEs are the best guide.
+
+- **[vishalsachdev/canvas-mcp](https://github.com/vishalsachdev/canvas-mcp)** is the most widely used. It is a broad suite of about 100 purpose-built tools for students and educators, including grading, messaging, accessibility scanning, optional anonymization of student data, and workflow skills. It works with many AI clients and also installs as a one-click Claude Desktop extension. If you want ready-made tools for particular jobs, start there.
+- **This project** is deliberately small: four generic tools that reach the whole Canvas API, in one readable server file of about 700 lines. Its distinguishing feature is the course guard: every write must name a live course and is refused if the path belongs to a different one (see "Course guard"). If you want a small connector you can read in an afternoon, with that check on every write, use this.
+
+More are on GitHub; search for "canvas mcp".
 
 ## License
 
