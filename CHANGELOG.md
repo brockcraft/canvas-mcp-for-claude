@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.1 (2026-10-03)
+
+The connector and extension code are unchanged. If you already have 1.2.0 installed, you only need the updated skill.
+
+- **Skill:** Claude now verifies each write's response against what it asked for before reporting success (for example that an announcement really came back as `is_announcement: true`), and says so plainly if Canvas did something different. The skill also describes the Canvas extension as the normal install.
+- Added `SECURITY.md` with private vulnerability reporting, bug and feature issue forms, and a GitHub Actions workflow that runs the tests on Python 3.10, 3.12 and 3.13, validates and builds the extension, and checks that the versions in the manifest, `pyproject.toml` and this file agree.
+- README: a note about the install warning Claude Desktop shows for extensions from outside Anthropic's directory, a "Related projects" section, and badges.
+
 ## 1.2.0 (2026-10-03)
 
 - **Canvas extension for Claude Desktop.** It now installs as a `.mcpb` extension: download it, double-click it, and enter your Canvas host and token in Claude Desktop. Claude Desktop keeps the token in your Mac's Keychain and manages the Python environment itself. This is now the recommended install; the setup script remains for Claude Code and for organizations that have turned extensions off.
