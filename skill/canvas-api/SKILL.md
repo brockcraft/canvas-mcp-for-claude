@@ -18,7 +18,7 @@ The tools may appear with a prefix such as `mcp__remote-devices__canvas__`. If t
 
 Paths are relative to `/api/v1`, e.g. `courses/12345/pages`. Endpoint reference: https://canvas.instructure.com/doc/api/ (fetch the relevant resource page when unsure of an endpoint or parameter name; do not guess).
 
-If the tools are still missing, tell the user the Canvas connector is not running: the Mac must be awake with the Claude desktop app open and the `canvas` entry in its config. Do not try to reach Canvas from the shell, the browser, or with the token.
+If the tools are still missing, tell the user the Canvas connector is not running: the Mac must be awake with the Claude desktop app open, and the Canvas extension (Settings → Extensions) installed and enabled, or the `canvas` entry present in the Claude config if it was installed with the setup script. Do not try to reach Canvas from the shell, the browser, or with the token.
 
 ## The `course` argument
 
@@ -39,14 +39,14 @@ Suggest that the user state the course in each Claude project's instructions, e.
 3. New content is unpublished (`published: false`) unless the user says to publish.
 4. Ask first, every time, before: any DELETE; publishing or unpublishing; changing grades, due dates or points on assignments with submissions; sending messages or posting announcements visible to students; changing enrollments or sections; bulk changes affecting more than about 10 objects (show the list first).
 5. Prefer narrow reads: `per_page=100`, `include[]`, `search_term`, `only[]` and specific IDs. Responses over ~150k characters are truncated.
-6. After writing, report what changed with the `html_url`.
+6. Verify, then report. A `200` does not prove Canvas did what you asked: it can ignore fields it doesn't accept or the account isn't allowed to set, and quietly create something different. Compare the returned object with the request before saying it worked: for example `is_announcement` is `true` for an announcement (otherwise a plain discussion topic was created), `published` matches what you asked for, and dates and points match. If anything differs, tell the user exactly what happened and what now exists in the course; don't call it a success and don't silently retry or clean up. When it matches, report what changed with the `html_url`.
 
 ## Common patterns
 
 - Page: `canvas_write(course="ABC 101 Au26", method="POST", path="courses/:id/pages", body={"wiki_page": {"title": "...", "body": "<p>...</p>", "published": false}})`; edit with PUT `courses/:id/pages/:url_or_id`.
 - Assignment: POST `courses/:id/assignments` body `{"assignment": {"name": "...", "points_possible": 10, "due_at": "2026-10-15T23:59:00-07:00", "submission_types": ["online_upload"], "published": false}}`.
 - Module item: POST `courses/:id/modules/:module_id/items` body `{"module_item": {"type": "Page", "page_url": "..."}}`.
-- Announcement (ask first): POST `courses/:id/discussion_topics` body `{"title": "...", "message": "<p>...</p>", "is_announcement": true, "published": false}`.
+- Announcement (ask first): POST `courses/:id/discussion_topics` body `{"title": "...", "message": "<p>...</p>", "is_announcement": true, "published": false}`. Check the response says `is_announcement: true`.
 - Calendar event: POST `calendar_events` with `"context_code": "course_:id"` inside `calendar_event`. Messages: POST `conversations` with a top-level `"context_code": "course_:id"` (ask first). The connector checks the course from `context_code`.
 - Submissions: GET `courses/:id/assignments/:aid/submissions` with `include[]=user`.
 - Dates use ISO 8601 with the local UTC offset.
